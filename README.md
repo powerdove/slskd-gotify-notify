@@ -37,7 +37,7 @@ GOTIFY_PASS=YourPassword
 
 ### 3. Configure Python Script
 
-Navigate to `slskd-scripts` & edit gotify-notify.py to your Gotify server address & token:
+Navigate to `slskd-scripts` & edit the variables in gotify-notify.py to point to your Gotify server address & token:
 
 ```bash
 cd slskd-scripts
