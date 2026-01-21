@@ -54,6 +54,7 @@ GOTIFY_TOKEN = "YOURTOKEN"
 The included `Dockerfile.slskd` extends the official slskd image and installs Python and required dependencies:
 
 ```bash
+docker compose build slskd
 docker compose up -d
 ```
 
