@@ -40,7 +40,7 @@ GOTIFY_TOKEN=your-gotify-app-token
 The included `Dockerfile.slskd` extends the official slskd image and installs Python and required dependencies:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 This will:
@@ -52,7 +52,7 @@ This will:
 
 ### Gotify Settings
 
-Update the script configuration in `slskd-gotify-notify.py`:
+Update the script configuration in `slskd-scripts/gotify-notify.py`:
 
 ```python
 GOTIFY_URL = "http://your-gotify-server:port/message"
@@ -61,7 +61,7 @@ GOTIFY_TOKEN = "your-gotify-app-token"
 
 ### slskd Event Integration
 
-The `slskd.yml` configuration file includes the script paths for event triggers:
+Edit the `Integration` section of your `slskd.yml` configuration file to include the script paths for event triggers:
 
 ```yaml
 integration:
@@ -107,10 +107,11 @@ integration:
 
 ```
 slskd-gotify-notify/
-├── Dockerfile.slskd          # Custom slskd image with Python
-├── docker-compose.yml         # Docker Compose configuration
-├── slskd-gotify-notify.py    # Notification script
-├── slskd.yml                  # slskd configuration file
+├── Dockerfile.slskd           # Custom slskd image with Python
+├── example-compose.yml        # Docker Compose configuration
+├── .env.example               # Environment variable configuration
+├── slskd-scripts/
+│   └──	gotify-notify.py       # Notification script
 └── README.md                  # This file
 ```
 
@@ -126,7 +127,7 @@ slskd-gotify-notify/
 
 ### Script Not Executing
 
-- Check Docker logs: `docker-compose logs slskd`
+- Check Docker logs: `docker logs slskd`
 - Verify the script has execute permissions in the container
 - Ensure the script path in `slskd.yml` matches the container path
 
@@ -179,25 +180,47 @@ RUN apk add --no-cache python3 py3-pip && \
 ## Docker Compose Example
 
 ```yaml
-version: '3.8'
-
+---
+name: media-stack
 services:
   slskd:
     build:
       context: .
       dockerfile: Dockerfile.slskd
     container_name: slskd
+    user: 1000:1000
+    cap_add:
+      - NET_ADMIN
     environment:
-      - SLSKD_HTTP_PORT=5030
-      - GOTIFY_URL=http://gotify:80/message
-      - GOTIFY_TOKEN=your-token-here
+      - SLSKD_REMOTE_CONFIGURATION=true
+      - "SLSKD_SHARED_DIR=/music;/ebooks"
     volumes:
-      - ./config:/app/config
-      - ./downloads:/app/downloads
-      - ./slskd.yml:/app/slskd.yml
+      - slskd-data:/app
+      - ./slskd-scripts:/app/scripts
+      - /your/download/directory:/data/Soulseek Downloads
+      - /your/music/directory:/music
+      - /your/ebook/directory:/ebooks
+    restart: "unless-stopped"
+
+  gotify:
+    image: gotify/server:latest
+    container_name: gotify
+    hostname: gotify
     ports:
-      - "5030:5030"
-    restart: unless-stopped
+      - 8000:80
+    environment:
+      - GOTIFY_DEFAULTUSER_NAME=${GOTIFY_USER}
+      - GOTIFY_DEFAULTUSER_PASS=${GOTIFY_PASS}
+      - TZ=Your/Timezone
+    volumes:
+      - gotify-data:/app/data
+      - gotify-config:/etc/gotify
+    restart: "unless-stopped"
+
+volumes:
+  slskd-data:
+  gotify-config:
+  gotify-data:
 ```
 
 ## Contributing
