@@ -1,0 +1,41 @@
+---
+name: media-stack
+services:
+  slskd:
+    build:
+      context: .
+      dockerfile: Dockerfile.slskd
+    container_name: slskd
+    user: 1000:1000
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - SLSKD_REMOTE_CONFIGURATION=true
+      - "SLSKD_SHARED_DIR=/music;/ebooks"
+    volumes:
+      - slskd-data:/app
+      - ./slskd-scripts:/app/scripts
+      - /your/download/directory:/data/Soulseek Downloads
+      - /your/music/directory:/music
+      - /your/ebook/directory:/ebooks
+    restart: "unless-stopped"
+
+  gotify:
+    image: gotify/server:latest
+    container_name: gotify
+    hostname: gotify
+    ports:
+      - 8000:80
+    environment:
+      - GOTIFY_DEFAULTUSER_NAME=${GOTIFY_USER}
+      - GOTIFY_DEFAULTUSER_PASS=${GOTIFY_PASS}
+      - TZ=Your/Timezone
+    volumes:
+      - gotify-data:/app/data
+      - gotify-config:/etc/gotify
+    restart: "unless-stopped"
+
+volumes:
+  slskd-data:
+  gotify-config:
+  gotify-data:
