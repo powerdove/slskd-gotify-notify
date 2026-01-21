@@ -28,14 +28,28 @@ cd slskd-gotify-notify
 
 ### 2. Configure Environment Variables
 
-Edit the `docker-compose.yml` file or create a `.env` file with your Gotify configuration:
+Edit the `compose.yml` file or rename `.env.example` to `.env` & adjust your Gotify variables (for initial configuration):
 
 ```env
-GOTIFY_URL=http://your-gotify-server:port/message
-GOTIFY_TOKEN=your-gotify-app-token
+GOTIFY_USER=YourUsername
+GOTIFY_PASS=YourPassword
 ```
 
-### 3. Build and Deploy
+### 3. Configure Python Script
+
+Navigate to `slskd-scripts` & edit gotify-notify.py to your Gotify server address & token:
+
+```bash
+cd slskd-scripts
+nano gotify-notify.py
+```
+
+```
+GOTIFY_URL = "http://GOTIFYURL:8000/message"
+GOTIFY_TOKEN = "YOURTOKEN"
+```
+
+### 4. Build and Deploy
 
 The included `Dockerfile.slskd` extends the official slskd image and installs Python and required dependencies:
 
@@ -49,15 +63,6 @@ This will:
 - Configure slskd to use the script for event notifications
 
 ## Configuration
-
-### Gotify Settings
-
-Update the script configuration in `slskd-scripts/gotify-notify.py`:
-
-```python
-GOTIFY_URL = "http://your-gotify-server:port/message"
-GOTIFY_TOKEN = "your-gotify-app-token"
-```
 
 ### slskd Event Integration
 
@@ -141,11 +146,11 @@ curl "http://your-gotify-server/message?token=YOUR_TOKEN" \
   -F "message=Test message" \
   -F "priority=5"
 ```
-- Check slskd logs for script execution errors: `docker-compose logs slskd`
+- Check slskd logs for script execution errors: `docker logs slskd`
 
 ### Python Dependencies Missing
 
-- Rebuild the Docker image: `docker-compose build --no-cache`
+- Rebuild the Docker image: `docker compose build --no-cache`
 - Verify the Dockerfile installs `python3` and `python3-requests`
 
 ### Incorrect Message Formatting
@@ -158,7 +163,7 @@ curl "http://your-gotify-server/message?token=YOUR_TOKEN" \
 
 ### Adjust Priority Levels
 
-Modify the `priority` variable for each event type in `slskd-gotify-notify.py`:
+Modify the `priority` variable for each event type in `/slskd-scripts/gotify-notify.py`:
 
 ```python
 priority = 7  # Values 0-10, higher = more urgent
