@@ -14,8 +14,7 @@ A Python script that bridges [slskd](https://github.com/slskd/slskd) event notif
 
 - [slskd](https://github.com/slskd/slskd) instance (configured and running)
 - [Gotify](https://gotify.net/) server with an application token
-- Python 3.6 or higher
-- `requests` library
+- Docker
 
 ## Installation
 
@@ -25,21 +24,68 @@ git clone https://github.com/powerdove/slskd-gotify-notify.git
 cd slskd-gotify-notify
 ```
 
-2. Install required Python dependencies:
-```bash
-pip install requests
+2. Rename example-compose.yml to compose.yml & configure it, per your requirement:
+```yml
+---
+name: media-stack
+services:
+  slskd:
+    build:
+      context: .
+      dockerfile: Dockerfile.slskd
+    container_name: slskd
+    user: 1000:1000
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - SLSKD_REMOTE_CONFIGURATION=true
+      - "SLSKD_SHARED_DIR=/music;/ebooks"
+    volumes:
+      - slskd-data:/app
+      - ./slskd-scripts:/app/scripts
+      - /your/download/directory:/data/Soulseek Downloads
+      - /your/music/directory:/music
+      - /your/ebook/directory:/ebooks
+    restart: "unless-stopped"
+
+  gotify:
+    image: gotify/server:latest
+    container_name: gotify
+    hostname: gotify
+    ports:
+      - 8000:80
+    environment:
+      - GOTIFY_DEFAULTUSER_NAME=${GOTIFY_USER}
+      - GOTIFY_DEFAULTUSER_PASS=${GOTIFY_PASS}
+      - TZ=Your/Timezone
+    volumes:
+      - gotify-data:/app/data
+      - gotify-config:/etc/gotify
+    restart: "unless-stopped"
+
+volumes:
+  slskd-data:
+  gotify-config:
+  gotify-data:
 ```
 
-3. Make the script executable:
+3. Rename .env.example to .env & adjust the environment variables, per your requirement:
+```
+GOTIFY_USER=YourUsername
+GOTIFY_PASS=YourPassword
+```
+
+4. Make the script executable:
 ```bash
-chmod +x slskd-gotify-notify.py
+cd slskd-scripts
+chmod +x gotify-notify.py
 ```
 
 ## Configuration
 
 ### 1. Update Script Variables
 
-Edit the script and configure your Gotify server details:
+Edit slskd-scripts/gotify-notify.py and configure your Gotify server details:
 
 ```python
 GOTIFY_URL = "http://your-gotify-server:port/message"
@@ -52,10 +98,35 @@ Add the script to your slskd configuration file (typically `slskd.yml`):
 
 ```yaml
 integration:
+  webhooks: {}
   scripts:
-    directory_download_completed: "/path/to/slskd-gotify-notify.py"
-    directory_download_errored: "/path/to/slskd-gotify-notify.py"
-    private_message_received: "/path/to/slskd-gotify-notify.py"
+    downloadcompletenotification:
+      on:
+        - DownloadDirectoryComplete
+      run:
+        command: null
+        executable: /usr/bin/python3
+        args: null
+        arglist:
+          - /app/scripts/gotify-notify.py
+    downloaderrornotification:
+      on:
+        - Noop
+      run:
+        command: null
+        executable: /usr/bin/python3
+        args: null
+        arglist:
+          - /app/scripts/gotify-notify.py
+    privatemessagenotification:
+      on:
+        - PrivateMessageReceived
+      run:
+        command: null
+        executable: /usr/bin/python3
+        args: null
+        arglist:
+          - /app/scripts/gotify-notify.py
 ```
 
 Alternatively, you can configure it via environment variables or command-line arguments according to the [slskd configuration documentation](https://github.com/slskd/slskd/blob/master/docs/config.md).
