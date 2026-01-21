@@ -94,7 +94,7 @@ GOTIFY_TOKEN = "your-gotify-app-token"
 
 ### 2. Configure slskd Event Bus
 
-Add the script to your slskd configuration file (typically `slskd.yml`):
+Add the script to the integration section of your slskd configuration file (typically `slskd.yml`):
 
 ```yaml
 integration:
