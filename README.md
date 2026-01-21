@@ -179,6 +179,8 @@ RUN apk add --no-cache python3 py3-pip && \
 
 ## Docker Compose Example
 
+The below `compose.yml` file is configured to use docker volumes, but you can also bind local directories to the container for persistent configurations.
+
 ```yaml
 ---
 name: media-stack
