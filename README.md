@@ -2,6 +2,8 @@
 
 A Docker-based integration that bridges [slskd](https://github.com/slskd/slskd) event notifications to [Gotify](https://gotify.net/) push notifications, enabling real-time mobile alerts for Soulseek download events and private messages.
 
+Although the accuracy of the 'metadata' that appears in these Slskd/Gotify notifications is limited by the remote path's adherence to the 'conventions' of music directory structure, I have still found these notifications useful & so have decided to share my solution.
+
 ## Features
 
 - **Download Complete Notifications**: Get notified when downloads finish with artist, album, and username details
