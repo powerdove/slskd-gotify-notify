@@ -109,15 +109,6 @@ integration:
         args: null
         arglist:
           - /app/scripts/gotify-notify.py
-    downloaderrornotification:
-      on:
-        - Noop
-      run:
-        command: null
-        executable: /usr/bin/python3
-        args: null
-        arglist:
-          - /app/scripts/gotify-notify.py
     privatemessagenotification:
       on:
         - PrivateMessageReceived
