@@ -92,6 +92,24 @@ integration:
           - /app/scripts/gotify-notify.py
 ```
 
+### Rebuilding After Updates
+
+Rebuild when SLSKD releases updates
+```
+docker compose build --no-cache slskd
+
+docker compose up -d slskd
+```
+
+Or pull new base image first
+```
+docker pull slskd/slskd:latest
+
+docker compose build slskd
+
+docker compose up -d slskd
+```
+
 ## Notification Types
 
 ### Download Complete
